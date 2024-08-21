@@ -74,10 +74,6 @@ async function loadBackup() {
   }
 }
 
-saveBackup().then(() => {
-  migrateData().catch((error) => {
-    console.error("Error: Migration failed, backup was saved");
-    process.exit(1);
-  });
-});
+await saveBackup();
+await loadBackup();
 // TODO:
