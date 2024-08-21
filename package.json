@@ -11,5 +11,5 @@
   "dependencies": {
     "sanity": "^3.55.0"
   },
-  "type": "module"
+  "type": "commonjs"
 }

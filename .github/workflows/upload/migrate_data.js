@@ -1,12 +1,13 @@
-import { createClient } from "@sanity/client";
-import { writeFileSync, readdirSync, readFileSync } from "fs";
+const { createClient } = require("@sanity/client");
+const fs = require("fs");
 
 const filename = `backup-${new Date().toISOString()}.ndjson`;
 
 const stagingClient = createClient({
   projectId: "n2r47ce3",
   dataset: "staging",
-  token: process.env.SANITY_PROJECT_TOKEN,
+  token:
+    "sk71xI4vw0iZs3bYSgP3fWT1dNOBeuFMtFJJu8xcrJnwaruc1VFAk2XqRoS8Epx1k1FmIPfZeA1U6wz1dTeeL0qr7iBbcrNAnzh9UKb7KSDvtGQBfhxbqdM1f32BKZgH1Mi9SjScsOGlOt8QuvrXiAYfRlSxRjSjCfCWHCYjDaPmbQTnLSXF",
   useCdn: false,
   apiVersion: "2023-05-03",
 });
@@ -14,7 +15,8 @@ const stagingClient = createClient({
 const productionClient = createClient({
   projectId: "n2r47ce3",
   dataset: "production",
-  token: process.env.SANITY_PROJECT_TOKEN,
+  token:
+    "sk71xI4vw0iZs3bYSgP3fWT1dNOBeuFMtFJJu8xcrJnwaruc1VFAk2XqRoS8Epx1k1FmIPfZeA1U6wz1dTeeL0qr7iBbcrNAnzh9UKb7KSDvtGQBfhxbqdM1f32BKZgH1Mi9SjScsOGlOt8QuvrXiAYfRlSxRjSjCfCWHCYjDaPmbQTnLSXF",
   useCdn: false,
   apiVersion: "2023-05-03",
 });
@@ -42,7 +44,7 @@ async function saveBackup() {
     const documents = await productionClient.fetch('*[!(_id in path("_.**"))]');
 
     // Save the documents to a file or cloud storage
-    writeFileSync(filename, JSON.stringify(documents, null, 2));
+    fs.writeFileSync(filename, JSON.stringify(documents, null, 2));
     console.log(`Backup saved to ${filename}`);
   } catch (error) {
     console.error("-----------------------------------");
@@ -56,13 +58,13 @@ async function saveBackup() {
 async function loadBackup() {
   try {
     // see what backups are available and choose the newest one
-    const backupFiles = readdirSync("./");
+    const backupFiles = fs.readdirSync("./");
     const backupFile = backupFiles
       .filter((file) => file.startsWith("backup-"))
       .sort()
       .reverse()[0];
     console.log("newest backup was: ", backupFile);
-    const backupData = readFileSync(backupFile, "utf8");
+    const backupData = fs.readFileSync(backupFile, "utf8");
     const documents = JSON.parse(backupData);
     for (const doc of documents) {
       await stagingClient.createOrReplace(doc);
@@ -74,6 +76,10 @@ async function loadBackup() {
   }
 }
 
-await saveBackup();
-await loadBackup();
+saveBackup().then(() => {
+  migrateData().catch((error) => {
+    console.error("Error: Migration failed, backup was saved");
+    process.exit(1);
+  });
+});
 // TODO:
