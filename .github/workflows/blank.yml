@@ -28,11 +28,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - name: go to workflow and initialize
-        run: cd .github/workflows/upload
       - name: Install dependencies
         run: npm install sanity sanity/client fs
       - name: Run script
-        run: node migrate_data.js
-        env: 
+        run: node .github/workflows/upload/migrate_data.js
+        env:
           SANITY_PROJECT_TOKEN: ${{ secrets.SANITY_PROJECT_TOKEN }}
