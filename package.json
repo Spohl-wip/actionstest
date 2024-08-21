@@ -10,5 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "sanity": "^3.55.0"
-  }
+  },
+  "type": "module"
 }
