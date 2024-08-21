@@ -1,5 +1,5 @@
-const { createClient } = require("@sanity/client");
-const fs = require("fs");
+import { createClient } from "@sanity/client";
+import { writeFileSync, readdirSync, readFileSync } from "fs";
 
 const filename = `backup-${new Date().toISOString()}.ndjson`;
 
@@ -42,7 +42,7 @@ async function saveBackup() {
     const documents = await productionClient.fetch('*[!(_id in path("_.**"))]');
 
     // Save the documents to a file or cloud storage
-    fs.writeFileSync(filename, JSON.stringify(documents, null, 2));
+    writeFileSync(filename, JSON.stringify(documents, null, 2));
     console.log(`Backup saved to ${filename}`);
   } catch (error) {
     console.error("-----------------------------------");
@@ -56,13 +56,13 @@ async function saveBackup() {
 async function loadBackup() {
   try {
     // see what backups are available and choose the newest one
-    const backupFiles = fs.readdirSync("./");
+    const backupFiles = readdirSync("./");
     const backupFile = backupFiles
       .filter((file) => file.startsWith("backup-"))
       .sort()
       .reverse()[0];
     console.log("newest backup was: ", backupFile);
-    const backupData = fs.readFileSync(backupFile, "utf8");
+    const backupData = readFileSync(backupFile, "utf8");
     const documents = JSON.parse(backupData);
     for (const doc of documents) {
       await stagingClient.createOrReplace(doc);
