@@ -29,7 +29,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - name: Install dependencies
-        run: npm install sanity sanity/client fs
+        run: npm install -g npm
+      - name: Install dependencies
+        run: npm install
       - name: Run script
         run: node .github/workflows/upload/migrate_data.js
         env:
